@@ -54,12 +54,11 @@ export function sendResponse(res: Response, result: any): Response {
 export function sendError(res: Response, err?: Exception): void {
   try {
     Sentry.captureMessage(JSON.stringify(err));
-    console.log(err);
     let error = err?.err;
     if (err?.error) {
       error = err.error;
     }
-    let errorCode = err?.errorCode || 1;
+    let errorCode = err?.errorCode || 2;
     let message;
     if (err instanceof ValidationError) {
       message = err.details;
@@ -85,9 +84,9 @@ export function sendError(res: Response, err?: Exception): void {
     sendResponse(res, result);
   } catch (error) {
     // Hopefully never happens...
-    console.log(error);
   }
 }
+
 
 // N.B. All 4 variables are required for express to call the handler
 /**
@@ -132,7 +131,6 @@ export function sendSuccess(res: Response, rslt = {}): void {
     const result = new APIResponse(true, rslt);
     sendResponse(res, result);
   } catch (error) {
-    console.log(error);
     throw error;
   }
 }

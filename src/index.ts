@@ -8,7 +8,7 @@ async function runServer(): Promise<void> {
   try {
     const app: Application = express();
     const PORT = process.env.PORT || 3000;
-
+   
     // Db connection
     connectDB();
 

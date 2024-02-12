@@ -1,0 +1,9 @@
+{
+    "NAME_REQUIRED": "Name is required",
+    "EMAIL": "Email is required",
+    "PASSWORD": "Password is required",
+    "DOMAIN": "Domain name is required",
+    "EXPERIENCE": "Experience in month required",
+    "AGE": "Age is required",
+    "INVALID_PASSWORD": "Invalid Password"
+}

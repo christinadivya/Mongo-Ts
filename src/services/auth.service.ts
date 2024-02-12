@@ -4,11 +4,20 @@ import { verifyPassword } from "../lib/bcrypt";
 import customExceptions from "../helpers/customException";
 import { generateToken } from "../lib/jwt";
 import { ILoginData } from "../interfaces/entity/Types";
+import { i18n } from "i18next";
 
 export class AuthService {
-  static async login(userData: IUser): Promise<ILoginData> {
+  private i18next: i18n;
+  private authDAO = new AuthDAO();
+
+  constructor(i18next: i18n, authDAO: AuthDAO ) {
+    this.i18next = i18next;
+    this.authDAO = authDAO;
+  }
+
+  async login(userData: IUser): Promise<ILoginData> {
     // check if user exists
-    const existingUser = await AuthDAO.get(userData);
+    const existingUser = await this.authDAO.get(userData);
     if (existingUser) {
       // check if password is valid
       const isPasswordValid = await verifyPassword(
@@ -26,10 +35,12 @@ export class AuthService {
         const userWithToken = { ...existingUser.toObject(), token };
         return userWithToken;
       } else {
-        throw customExceptions.validationError("Invalid Password");
+        throw customExceptions.validationError(
+          this.i18next.t("INVALID_PASSWORD")
+        );
       }
     } else {
-      throw customExceptions.validationError("Invalid Email");
+      throw customExceptions.validationError(this.i18next.t("INVALID_EMAIL"));
     }
   }
 }

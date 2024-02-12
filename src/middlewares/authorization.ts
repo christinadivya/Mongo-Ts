@@ -9,9 +9,12 @@ import { IUser } from "../interfaces/entity/User";
  * @public
  */
 export default class JwtAuthenticator {
-  constructor() {
+  userDao: UserDAO;
+  constructor( userDao: UserDAO) {
+    this.userDao = userDao;
     // Bind the authenticateAndAuthorizeToken method to the JwtAuthenticator instance
-    this.authenticateAndAuthorizeToken = this.authenticateAndAuthorizeToken.bind(this);
+    this.authenticateAndAuthorizeToken =
+      this.authenticateAndAuthorizeToken.bind(this);
   }
 
   /**
@@ -23,25 +26,28 @@ export default class JwtAuthenticator {
     next: NextFunction
   ): Promise<void> {
     try {
-      const typedReq = req as Request & { user?: IUser, token?: string };
+      const typedReq = req as Request & { user?: IUser; token?: string };
       const jwtToken = typedReq.get("authorization");
       if (!jwtToken) {
-        throw customExceptions.validationError("Authorization token is missing");
+        throw customExceptions.unAuthenticatedAccess(
+          "Authorization token is missing",
+          2
+        );
       }
       const userToken = await verifyToken(jwtToken);
       if (!userToken || !userToken._id) {
-        throw customExceptions.validationError("Invalid token");
+        throw customExceptions.unAuthenticatedAccess("Invalid token", 2);
       }
-      const user = await UserDAO.getUserById(userToken._id);
+      const user = await this.userDao.getUserById(userToken._id);
       if (!user) {
-        throw customExceptions.validationError("User not found");
+        throw customExceptions.validationError("Invalid User");
       }
       typedReq.user = user;
       typedReq.token = jwtToken;
       next();
     } catch (e) {
       console.error(e.message);
-      next(e);
+      res.status(401).json({ error: e.message }); // Send 401 Unauthorized status with custom error message
     }
   }
 }
